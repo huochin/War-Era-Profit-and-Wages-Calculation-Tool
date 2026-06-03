@@ -14,9 +14,9 @@ A fully automated desktop application for the game **WarEra**. This tool pulls l
 ## 🚀 Installation & Usage
 
 1. Go to the **Releases** tab on the right side of this GitHub page.
-2. Download the latest `WarEra_Analyser.zip` file.
+2. Download the latest `ProfitnWagesCalc.zip` file.
 3. Extract the `.zip` folder somewhere on your computer.
-4. Double-click **`WarEraApp.exe`** to run the program.
+4. Double-click **`AllBonusV3.exe`** to run the program.
 5. When the window opens, paste your **WarEra API Key** (must start with `wae_`) into the input box and click **Save & Run**.
 6. Once finished, check the folder for your newly generated CSV and PNG dashboard!
 
