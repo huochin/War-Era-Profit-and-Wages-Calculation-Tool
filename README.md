@@ -34,3 +34,6 @@ This application communicates directly with the official WarEra API. Your API ke
 
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Acknowledgments
+* Portions of the Python logic, including the Flask conversion and Matplotlib chart generation for the market data, were developed with the assistance of Google's Gemini AI.
