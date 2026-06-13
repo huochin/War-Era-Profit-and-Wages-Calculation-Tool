@@ -161,8 +161,8 @@ def run_warera_analysis(api_key, log_callback, done_callback):
 
         # --- NEW: MANUAL OVERRIDE FOR WOOD & PAPER ---
         # Replace the numbers below with the actual market prices when API endpoints is malfunctioning.
-        # live_prices['wood'] = 0.106   # Example: Price of Wood
-        # live_prices['paper'] = 0.232  # Example: Price of Paper
+        # live_prices['wood'] = 0.078   # Example: Price of Wood
+        # live_prices['paper'] = 0.164  # Example: Price of Paper
         # ---------------------------------------------
 
         log_callback("⚙️ Calculating economic data...")
@@ -275,9 +275,10 @@ def run_warera_analysis(api_key, log_callback, done_callback):
         best_df['Bonus Source'] = best_df['Bonus Source'].replace(custom_names)
 
         display_df = best_df[['Bonus Source', 'Profit per PP', 'Old workers top wages', 'Top wages after tax']].copy()
-        display_df.rename(columns={'Bonus Source': 'Product', 'Old workers top wages': 'Old Worker\'s Top Wages'}, inplace=True)
+        display_df.rename(columns={'Bonus Source': 'Product', 'Old workers top wages': 'Top Gross Wages', 
+                                   'Top wages after tax': 'Top Net Wages'}, inplace=True)
 
-        for col in ['Profit per PP', 'Old Worker\'s Top Wages', 'Top wages after tax']:
+        for col in ['Profit per PP', 'Top Gross Wages', 'Top Net Wages']:
             display_df[col] = display_df[col].apply(lambda x: f"{float(x):.3f}")
 
         current_time = datetime.now().strftime("%d/%m/%y, %H:%M")
@@ -286,7 +287,7 @@ def run_warera_analysis(api_key, log_callback, done_callback):
         table_data.append(footer_row)
         col_labels = display_df.columns.tolist()
 
-        fig, ax = plt.subplots(figsize=(10, len(table_data) * 0.35))
+        fig, ax = plt.subplots(figsize=(5, len(table_data) * 0.35))
         ax.axis('off')
 
         table = ax.table(cellText=table_data, colLabels=col_labels, loc='center', cellLoc='left')
@@ -304,14 +305,14 @@ def run_warera_analysis(api_key, log_callback, done_callback):
                 cell.set_text_props(weight='bold', color='black')
             elif row == last_row_idx:
                 cell.set_facecolor('white')
-                cell.set_edgecolor('white') 
+                cell.visible_edges = 'open'
                 if col >= len(col_labels) - 2:
-                    cell.set_text_props(ha='right') 
+                    cell.set_text_props(ha='right')
             else:
                 if row % 2 == 0: cell.set_facecolor('#E8F5E9') 
                 else: cell.set_facecolor('white') 
 
-        plt.savefig('wages_summary_chart.png', bbox_inches='tight', pad_inches=0.02, dpi=300)
+        plt.savefig('product_profitability_ranking_chart.png', bbox_inches='tight', pad_inches=0.02, dpi=600)
         log_callback("✅ Chart successfully generated as 'wages_summary_chart.png'!")
 
         # ----------------------------------------------------
@@ -335,32 +336,37 @@ def run_warera_analysis(api_key, log_callback, done_callback):
         
         # Select exact column headers to match reference dashboard image format
         display_ranked = best_ranked_df[[
-            'Region Name', 'Country Name', 'Income Tax Rate', 'Total Bonus', 'Bonus Source',
-            'Price of Goods', 'Price of Raw Material', 'Profit per PP', 'Old workers top wages', 'Top wages after tax'
+            'Region Name', 'Country Name', 'Bonus Source', 
+            'Price of Goods', 'Price of Raw Material', 'Total Bonus', 'Profit per PP', 
+            'Old workers top wages', 'Income Tax Rate', 'Top wages after tax'
         ]].copy()
         
         # Step 4: Rename headers as specified
         display_ranked.rename(columns={
-            'Income Tax Rate': 'Income Tax',
+            'Income Tax Rate': 'Tax %',
             'Total Bonus': 'Prod Bonus',
-            'Top wages after tax': 'Top Net Wages'
+            'Top wages after tax': 'Top Net Wages',
+            'Price of Goods' : 'Price',
+            'Bonus Source': 'Product',
+            'Price of Raw Material' : 'Matl',
+            'Old workers top wages' : 'Top Gross Wages'
         }, inplace=True)
         
         # Step 4: Configure precision scaling format constraints
         display_ranked['Prod Bonus'] = display_ranked['Prod Bonus'].apply(lambda x: f"{float(x):.2f}")
-        display_ranked['Income Tax'] = display_ranked['Income Tax'].apply(lambda x: f"{float(x):.1f}")
+        display_ranked['Tax %'] = display_ranked['Tax %'].apply(lambda x: f"{float(x):.1f}")
         
-        numeric_3_dec = ['Price of Goods', 'Price of Raw Material', 'Profit per PP', 'Old workers top wages', 'Top Net Wages']
+        numeric_3_dec = ['Price', 'Matl', 'Profit per PP', 'Top Gross Wages', 'Top Net Wages']
         for col in numeric_3_dec:
             display_ranked[col] = display_ranked[col].apply(lambda x: f"{float(x):.3f}")
             
         # Draw the table layout structure
         table_data_ranked = display_ranked.values.tolist()
-        footer_row_ranked = [""] * (len(display_ranked.columns) - 2) + ["Analysed at", current_time]
+        footer_row_ranked = [""] * (len(display_ranked.columns) - 3) + ["Analysed at", "", current_time]
         table_data_ranked.append(footer_row_ranked)
         col_labels_ranked = display_ranked.columns.tolist()
         
-        fig2, ax2 = plt.subplots(figsize=(16, len(table_data_ranked) * 0.35))
+        fig2, ax2 = plt.subplots(figsize=(11, len(table_data_ranked) * 0.35))
         ax2.axis('off')
         
         table2 = ax2.table(cellText=table_data_ranked, colLabels=col_labels_ranked, loc='center', cellLoc='left')
@@ -378,18 +384,18 @@ def run_warera_analysis(api_key, log_callback, done_callback):
                 cell.set_text_props(weight='bold', color='black')
             elif row == last_row_idx2:
                 cell.set_facecolor('white')
-                cell.set_edgecolor('white')
-                if col >= len(col_labels_ranked) - 2:
+                cell.visible_edges = 'open'  # Removes borders entirely from the footer row
+                if col >= len(col_labels_ranked) - 3:
                     cell.set_text_props(ha='right')
             else:
                 if row % 2 == 0: cell.set_facecolor('#EAF2F8')
                 else: cell.set_facecolor('white')
                 
                 # Step 4: Explicit right alignment parsing logic for numeric column rows
-                if col in [2, 3, 5, 6, 7, 8, 9]:
+                if col in [3, 4, 5, 6, 7, 8, 9]:
                     cell.set_text_props(ha='right')
                     
-        plt.savefig('ranked_wages_chart.png', bbox_inches='tight', pad_inches=0.02, dpi=300)
+        plt.savefig('regional_wages_ranking_chart.png', bbox_inches='tight', pad_inches=0.02, dpi=600)
         log_callback("✅ Ranked chart successfully generated as 'ranked_wages_chart.png'!")
         log_callback("\n🎉 All processes complete. You can close this window.")
         
