@@ -198,9 +198,12 @@ def run_warera_analysis(api_key, log_callback, done_callback):
             bonus_source = "None"
             
             if party_ind in [1, 2]:
-                ind_specs = ["oil", "petroleum", "steel", "iron", "concrete", "limestone", "lead", "lightammo", "ammo", "heavyammo", "wood", "paper"]
+                ind_specs = ["oil", "petroleum", "steel", "iron", "concrete", "limestone", "lead", 
+                             "lightammo", "ammo", "heavyammo", "wood", "paper"]
                 if spec in ind_specs:
                     total_bonus = ethics_bonus + sr_bonus + (deposit_bonus if dep == spec else 0)
+                elif spec not in ind_specs:
+                    total_bonus = sr_bonus
                 bonus_source = original_spec
             elif party_ind in [-1, -2]:
                 agri_deps = ["fish", "coca", "grain", "livestock"]
@@ -281,7 +284,7 @@ def run_warera_analysis(api_key, log_callback, done_callback):
         for col in ['Profit per PP', 'Top Gross Wages', 'Top Net Wages']:
             display_df[col] = display_df[col].apply(lambda x: f"{float(x):.3f}")
 
-        current_time = datetime.now().strftime("%d/%m/%y, %H:%M")
+        current_time = datetime.utcnow().strftime("%d/%m/%y, %H:%M UTC")
         table_data = display_df.values.tolist()
         footer_row = [""] * (len(display_df.columns) - 2) + ["Analysed at", current_time]
         table_data.append(footer_row)
