@@ -6,7 +6,7 @@ import csv
 import threading
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
-from datetime import datetime
+from datetime import datetime, timezone
 import pandas as pd
 
 # CRITICAL: When generating charts in a background thread, we must tell 
@@ -201,7 +201,7 @@ def run_warera_analysis(api_key, log_callback, done_callback):
                 ind_specs = ["oil", "petroleum", "steel", "iron", "concrete", "limestone", "lead", 
                              "lightammo", "ammo", "heavyammo", "wood", "paper"]
                 if spec in ind_specs:
-                    total_bonus = ethics_bonus + sr_bonus + (deposit_bonus if dep == spec else 0)
+                    total_bonus = ethics_bonus + sr_bonus
                 elif spec not in ind_specs:
                     total_bonus = sr_bonus
                 bonus_source = original_spec
@@ -210,7 +210,7 @@ def run_warera_analysis(api_key, log_callback, done_callback):
                 total_bonus = ethics_bonus + (deposit_bonus if dep in agri_deps else 0)
                 bonus_source = deposit
             else: 
-                total_bonus = sr_bonus + deposit_bonus if dep == 'none' else max(sr_bonus, deposit_bonus)
+                total_bonus = sr_bonus + deposit_bonus if dep == spec else max(sr_bonus, deposit_bonus)
                 bonus_source = deposit if deposit_bonus > sr_bonus else original_spec
 
             recipe = RECIPES.get(bonus_source.lower())
@@ -284,7 +284,7 @@ def run_warera_analysis(api_key, log_callback, done_callback):
         for col in ['Profit per PP', 'Top Gross Wages', 'Top Net Wages']:
             display_df[col] = display_df[col].apply(lambda x: f"{float(x):.3f}")
 
-        current_time = datetime.utcnow().strftime("%d/%m/%y, %H:%M UTC")
+        current_time = datetime.now(timezone.utc).strftime("%d/%m/%y, %H:%M UTC")
         table_data = display_df.values.tolist()
         footer_row = [""] * (len(display_df.columns) - 2) + ["Analysed at", current_time]
         table_data.append(footer_row)
